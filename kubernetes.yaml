@@ -1,32 +1,49 @@
----
-apiVersion: v1
-kind: Service
-metadata:
-   name: kafka-cluster-service
-spec:
-   clusterIP: None
-   ports:
-   - protocol: TCP
-     port: <multipass-port-you-are-using>
-     targetPort: <multipass-port-you-are-using>
-   selector:  
-     name:  example
-   type: ClusterIP
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: kafka-cluster-service
-subsets:
-  - addresses:
-    - ip: 10.62.176.1
-    ports:
-      - port: <multipass-port-you-are-using>
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#    name: kafka-cluster
+#    namespace: default
+# spec:
+#    clusterIP: None
+#    ports:
+#    - protocol: TCP
+#      port: 9092
+#      targetPort: 9092
+#    type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Endpoints
+# metadata:
+#   namespace: default
+#   name: kafka-cluster
+# subsets:
+#   - addresses:
+#     - ip: 192.168.65.2
+#     ports:
+#       - port: 9092
 
+
+
+# host.minikube.internal
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: default
+  name: kafka-cluster
+spec:
+  type: ExternalName
+  externalName: host.minikube.internal  #host.docker.internal #host.minikube.internal 
+  # ports:
+  #   - port: 9092
+  #     targetPort: 9092
+  #     protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
   name: schema-registry
   labels:
     app: schema-registry
@@ -45,6 +62,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: default
   labels:
     app: schema-registry
   name: schema-registry
@@ -58,30 +76,35 @@ spec:
       labels:
         app: schema-registry
     spec:
+      enableServiceLinks: false
       containers:
       - env:
         - name: SCHEMA_REGISTRY_HOST_NAME
-          value: schema-registry
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        # - name: SCHEMA_REGISTRY_HOST_NAME
+        #   value: schema-registry
         - name: SCHEMA_REGISTRY_LISTENERS
           value: http://0.0.0.0:8081
         - name: SCHEMA_REGISTRY_MASTER_ELIGIBILITY
           value: "true"
         - name: SCHEMA_REGISTRY_DEBUG
           value: "true"
-        - name: SCHEMA_REGISTRY_HEAP_OPTS
-          value: -Xms512M -Xmx2G
-        - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG
-          value: "org.apache.kafka.common.security.scram.ScramLoginModule required \ username="<Secret Manager Credentials>" \ password="<Secret Manager Credentials>";
-        - name: SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID
-          value: cp-schema-registry
-        - name: SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL
-          value: SASL_SSL
-        - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM
-          value: SCRAM-SHA-512
+        # - name: SCHEMA_REGISTRY_HEAP_OPTS
+        #   value: -Xms512M -Xmx2G
+        # - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG
+        #   value: "org.apache.kafka.common.security.scram.ScramLoginModule required \ username="<Secret Manager Credentials>" \ password="<Secret Manager Credentials>";
+        # - name: SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID
+        #   value: cp-schema-registry
+        # - name: SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL
+        #   value: SASL_SSL
+        # - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM
+        #   value: SCRAM-SHA-512
         - name: SCHEMA_REGISTRY_KAFKASTORE_TOPIC
           value: _schemas
         - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
-          value: SASL_SSL://<AWS MSK Broker URL>:9096
+          value: PLAINTEXT://kafka-cluster.default.svc:9092
         name: schema-registry
         image: confluentinc/cp-schema-registry:6.0.1
         ports:
