@@ -1,0 +1,5 @@
+class KafkaStream{
+    constructor() {
+
+    }
+}
