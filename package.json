@@ -1,5 +1,20 @@
 {
+  "name": "kafkajs_avro_demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "node-rdkafka": "^2.13.0"
+    "@kafkajs/confluent-schema-registry": "^3.2.1",
+    "config": "^3.3.7",
+    "js-yaml": "^4.1.0",
+    "kafkajs": "^2.1.0",
+    "node-fetch": "^3.2.10"
   }
 }

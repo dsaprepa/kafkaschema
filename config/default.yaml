@@ -1,0 +1,8 @@
+server:
+  host: localhost
+kafka:
+  brokers:
+    - localhost:9092
+  clientId: sample-kafka
+schema:
+  registry: http://localhost:8081
