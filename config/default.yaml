@@ -1,8 +1,47 @@
 server:
   host: localhost
 kafka:
-  brokers:
-    - localhost:9092
-  clientId: sample-kafka
-schema:
-  registry: http://localhost:8081
+  client:
+    brokers:
+      - localhost:9092
+      - localhost:9095
+      - localhost:9098
+    clientId: sample-kafka
+    authenticationTimeout: 10000
+    reauthenticationThreshold: 10000
+    ssl: true
+    sasl:
+      mechanism: plain
+      username: test
+      password: testtest
+    connectionTimeout: 3000
+    requestTimeout: 25000
+    enforceRequestTimeout: false
+    retry:
+      initialRetryTime: 100
+      retries: 8
+
+
+  schema:
+    registry: http://localhost:8081
+  consumer:
+    fromBeginning: true
+    groupId: my-kafka-consumer
+    sessionTimeout: 30000
+    rebalanceTimeout: 60000
+    heartbeatInterval: 3000
+    metadataMaxAge: 300000
+    allowAutoTopicCreation: false
+    maxBytesPerPartition: 1048576 # 1MB
+    minBytes: 1
+    maxBytes: 10485760 #(10MB)
+    maxWaitTimeInMs: 5000
+    retry: { retries: 5 }
+  producer:
+    allowAutoTopicCreation: false
+    acks: -1
+    timeout: 30000
+    transactionTimeout: 30000
+  kstream:
+    - kstream
+sns:

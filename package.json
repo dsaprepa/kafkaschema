@@ -13,6 +13,7 @@
   "dependencies": {
     "@kafkajs/confluent-schema-registry": "^3.2.1",
     "config": "^3.3.7",
+    "ip": "^1.1.8",
     "js-yaml": "^4.1.0",
     "kafkajs": "^2.1.0",
     "node-fetch": "^3.2.10"

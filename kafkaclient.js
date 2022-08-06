@@ -1,16 +1,31 @@
-import {Kafka} from "kafkajs";
+import {Kafka, logLevel} from "kafkajs";
+import fs from 'fs'
+import ip from 'ip'
+import config from 'config';
+
+const {  client } = config.get("kafka")
+console.log(`The config client value is: ${JSON.stringify(client, null, 4)}`)
+
+const host = process.env.HOST_IP || ip.address()
+
 
 const kafkaClient = new Kafka({
-    clientId: 'my-app',
-    brokers: ['localhost:9092', 'localhost:9092'],
+
+    logLevel: logLevel.INFO,
+    brokers: [`${host}:9094`, `${host}:9097`, `${host}:9100`],
+    clientId: 'example-consumer',
+    ssl: {
+        servername: 'localhost',
+        rejectUnauthorized: false,
+        ca: [fs.readFileSync('./testHelpers/certs/cert-signed', 'utf-8')],
+    },
+    sasl: {
+        mechanism: 'plain',
+        username: 'test',
+        password: 'testtest',
+    },
     authenticationTimeout: 10000,
     reauthenticationThreshold: 10000,
-    ssl: true,
-    sasl: {
-        mechanism: 'plain', // scram-sha-256 or scram-sha-512
-        username: 'my-username',
-        password: 'my-password'
-    },
     connectionTimeout: 3000,
     requestTimeout: 25000,
     enforceRequestTimeout: false,
@@ -18,8 +33,6 @@ const kafkaClient = new Kafka({
         initialRetryTime: 100,
         retries: 8
     },
-    logLevel: logLevel.ERROR,
-
 })
 
 export default kafkaClient;
